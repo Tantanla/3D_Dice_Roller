@@ -22,9 +22,6 @@ function subscribe(store, ...callbacks) {
   const unsub = store.subscribe(...callbacks);
   return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
 }
-function null_to_empty(value) {
-  return value == null ? "" : value;
-}
 let current_component;
 function set_current_component(component) {
   current_component = component;
@@ -39,33 +36,6 @@ function setContext(key, context) {
 }
 function getContext(key) {
   return get_current_component().$$.context.get(key);
-}
-function ensure_array_like(array_like_or_iterator) {
-  return array_like_or_iterator?.length !== void 0 ? array_like_or_iterator : Array.from(array_like_or_iterator);
-}
-const ATTR_REGEX = /[&"<]/g;
-const CONTENT_REGEX = /[&<]/g;
-function escape(value, is_attr = false) {
-  const str = String(value);
-  const pattern = is_attr ? ATTR_REGEX : CONTENT_REGEX;
-  pattern.lastIndex = 0;
-  let escaped = "";
-  let last = 0;
-  while (pattern.test(str)) {
-    const i = pattern.lastIndex - 1;
-    const ch = str[i];
-    escaped += str.substring(last, i) + (ch === "&" ? "&amp;" : ch === '"' ? "&quot;" : "&lt;");
-    last = i + 1;
-  }
-  return escaped + str.substring(last);
-}
-function each(items, fn) {
-  items = ensure_array_like(items);
-  let str = "";
-  for (let i = 0; i < items.length; i += 1) {
-    str += fn(items[i], i);
-  }
-  return str;
 }
 const missing_component = {
   $$render: () => ""
@@ -117,21 +87,16 @@ function create_ssr_component(fn) {
   };
 }
 function add_attribute(name, value, boolean) {
-  if (value == null || boolean) return "";
-  const assignment = `="${escape(value, true)}"`;
-  return ` ${name}${assignment}`;
+  return "";
 }
 export {
-  subscribe as a,
-  add_attribute as b,
+  setContext as a,
+  subscribe as b,
   create_ssr_component as c,
-  each as d,
-  escape as e,
-  noop as f,
+  add_attribute as d,
   getContext as g,
-  safe_not_equal as h,
   missing_component as m,
-  null_to_empty as n,
-  setContext as s,
+  noop as n,
+  safe_not_equal as s,
   validate_component as v
 };
